@@ -3,7 +3,7 @@ var clients = require('restify-clients');
 
 function ProdutosParaDescarteClient(){
   this._cliente = clients.createJsonClient({
-    url:'http://localhost:3002'
+    url:'https://asd-estoque.herokuapp.com'
   });
 }
 
