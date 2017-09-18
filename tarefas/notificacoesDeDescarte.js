@@ -76,21 +76,13 @@ module.exports = function(app){
 
   function postaMensagemNaFila(notificacao, idNotificacao){
 
-    var destination = '/queue/ManahSolicitacaoDescarteQueue';
-    var endereco = '127.0.0.1';
-    var porta = '61613';
-    var user = 'admin';
-    var senha = 'admin';
+    var destination = 'https://sqs.sa-east-1.amazonaws.com/210111500613/ManahSolicitacaoDescarteQueue';
     var msg = JSON.stringify(notificacao.NOTIFICACAO_JSON_VALORES);
 
     var filas = new app.filas.MessageProducer();
-    filas.enviaSolicitacaoDescarte(destination, endereco, porta, user, senha, msg);
+    filas.enviaSolicitacaoDescarte(destination, msg);
 
     alteraStatusPostagemNotificacaoNaFila(idNotificacao);
-
-    //
-    // console.log('POSTOU');
-    // console.log(JSON.stringify(notificacao.NOTIFICACAO_JSON_VALORES));
 
   }
 
@@ -109,19 +101,4 @@ module.exports = function(app){
 
   }
 
-
 }
-
-//http://www.codexpedia.com/javascript/nodejs-cron-schedule-examples/
-
-
-
-// aqui eh o certo
-  //rule.second = 10;
-  // cron.scheduleJob(rule, function(){
-
-
-  //0 */3 * * *
-  //Cron a cada 5 minutos: 0-59/5  * * * *
-  //Cron todo dia a meia noite: 0 0 * * *
-  //Cron todo minuto: * * * * *

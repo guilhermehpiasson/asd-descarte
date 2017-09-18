@@ -12,6 +12,7 @@
     "javascript"
   ],
   "dependencies": {
+    "aws-sdk": "^2.117.0",
     "body-parser": "^1.17.2",
     "consign": "^0.1.6",
     "date-and-time": "^0.5.0",
