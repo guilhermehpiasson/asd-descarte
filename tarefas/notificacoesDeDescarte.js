@@ -75,15 +75,19 @@ module.exports = function(app){
   }
 
   function postaMensagemNaFila(notificacao, idNotificacao){
+		var msgNotificacao = JSON.parse(notificacao.NOTIFICACAO_JSON_VALORES);
 
-    var destination = 'https://sqs.sa-east-1.amazonaws.com/210111500613/ManahSolicitacaoDescarteQueue';
-    var msg = JSON.stringify(notificacao.NOTIFICACAO_JSON_VALORES);
+		if(msgNotificacao.FORNECEDOR_ID == '1'){
+			var destination = 'https://sqs.sa-east-1.amazonaws.com/210111500613/ManahSolicitacaoDescarteQueue';
+	    var msg = JSON.stringify(notificacao.NOTIFICACAO_JSON_VALORES);
 
-    var filas = new app.filas.MessageProducer();
-    filas.enviaSolicitacaoDescarte(destination, msg);
+	    var filas = new app.filas.MessageProducer();
+	    filas.enviaSolicitacaoDescarte(destination, msg);
 
-    alteraStatusPostagemNotificacaoNaFila(idNotificacao);
-
+	    alteraStatusPostagemNotificacaoNaFila(idNotificacao);
+		}else {
+			console.log('FORNECEDOR '+msgNotificacao.FORNECEDOR_ID);
+		}
   }
 
   function alteraStatusPostagemNotificacaoNaFila(idNotificacao){
