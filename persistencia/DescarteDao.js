@@ -1,3 +1,9 @@
+/*
+ * Arquivo: DescarteDao.js
+ * Author: Guilherme Henrique Piasson
+ * Description: Arquivo com a implementação de queries de manipulação do datasource.
+ * Data: 19/09/2017
+ */
 function DescarteDao(connection) {
     this._connection = connection;
 }

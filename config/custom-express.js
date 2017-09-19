@@ -1,3 +1,10 @@
+/*
+ * Arquivo: custom-express.js
+ * Author: Guilherme Henrique Piasson
+ * Description: Arquivo que carrega o express.
+ *              Além disso o mesmo define porta, entre outras configurações.
+ * Data: 19/09/2017
+ */
 var express = require('express');
 var consign = require('consign');
 var bodyParser = require('body-parser');

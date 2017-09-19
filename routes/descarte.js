@@ -1,3 +1,12 @@
+/*
+ * Arquivo: estoque.js
+ * Author: Guilherme Henrique Piasson
+ * Description: Arquivo com a implmentação das rotas disponiveis desse modulo.
+ *              Atente para o fato de que as rotas /descarte/listaExecucoes, /descarte/consultaErrosDeExecucao
+ *              e /descarte/listaNotificacoes, são consumidas por um Clientes REST do modulo AsdView.
+  *							Em caso de erros, podem ser gerados registros de logs e também persistidos no datasource.
+ * Data: 19/09/2017
+ */
 var logger = require('../servicos/logger.js');
 
 module.exports = function(app){

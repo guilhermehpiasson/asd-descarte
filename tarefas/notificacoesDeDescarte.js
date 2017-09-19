@@ -1,3 +1,13 @@
+/*
+ * Arquivo: notificacoesDeDescarte.js
+ * Author: Guilherme Henrique Piasson
+ * Description: Arquivo com a implementação da execução de rotinas de verificação para notificação de descarte.
+ *							Cron - //0 1 * * * - Disparar rotina todo dia as 01hs da manhã.
+ *							Cron - //*`/2 * * * * - Disparar rotina a cada dois minutos.
+ *							Em caso de erros, podem ser gerados registros de logs e também persistidos no datasource.
+ *							Nesse arquivo é implementada a origem de uma chamada a postagem de mensagem em fila MQ SQS da AWS.
+ * Data: 19/09/2017
+ */
 var logger = require('../servicos/logger.js');
 
 var cron = require('node-schedule');
@@ -6,8 +16,7 @@ var date = require('date-and-time');
 module.exports = function(app){
 
 	var rule = new cron.RecurrenceRule();
-  //0 1 * * *
-  // */2 * * * *
+
   cron.scheduleJob('0 1 * * *', function(){
 			logger.warn("NOVA DATA 1", date.format(new Date(), 'DD/MM/YYYY HH:mm:ss'));
       disparoDeExecucao();
@@ -72,7 +81,7 @@ module.exports = function(app){
 		var msgNotificacao = JSON.parse(notificacao.NOTIFICACAO_JSON_VALORES);
 
 		if(msgNotificacao.FORNECEDOR_ID == '1'){
-			var destination = 'https://sqs.sa-east-1.amazonaws.com/210111500613/ManahSolicitacaoDescarteQueue';
+			var destination = "https://sqs.sa-east-1.amazonaws.com/210111500613/ManahSolicitacaoDescarteQueue";
 	    var msg = JSON.stringify(notificacao.NOTIFICACAO_JSON_VALORES);
 
 	    var filas = new app.filas.MessageProducer();
@@ -101,8 +110,6 @@ module.exports = function(app){
     var DescarteDao = new app.persistencia.DescarteDao(connection);
     DescarteDao.registraErroExecucao(idExecucao, new Date(), msg, function(erro, resultado){
       if(erro){
-				console.log(erro);
-				console.log(' idExecucao: '+ idExecucao +' DATE: '+ new Date() +' MSG: '+ msg);
         logger.error('notificacoesDeDescarte.Js/persisteErro: ' + erro);
       }
     });
