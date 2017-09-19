@@ -8,14 +8,14 @@ MessageProducer.prototype.enviaSolicitacaoDescarte = function(destination, msg){
 
   var params = {
     MessageBody: msg,
-    QueueUrl: "https://sqs.sa-east-1.amazonaws.com/210111500613/ManahSolicitacaoDescarteQueue",
+    QueueUrl: destination,
     MessageAttributes: {
       someKey: { DataType: 'String', StringValue: "string"}
     }
   };
   sqs.sendMessage(params, function(err, data) {
-    if (err) common.logError(err, err.stack); // an error occurred
-    else     common.log(data);           // successful response
+    if (err) common.logError(err, err.stack);
+    else     common.log(data);
   });
 };
 

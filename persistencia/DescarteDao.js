@@ -30,8 +30,8 @@ DescarteDao.prototype.listaNotificacoes = function (callback) {
     this._connection.query('SELECT * FROM NOTIFICACOES', callback);
 }
 
-DescarteDao.prototype.registraErroExecucao = function (callback) {
-    this._connection.query('', callback);
+DescarteDao.prototype.registraErroExecucao = function (idExecucao, data, msg, callback) {
+    this._connection.query('INSERT INTO ERRO_EXECUCOES (`EXECUCOES_ID`, `ERRO_EXECUCAO_DATA_ERRO`, `ERRO_EXECUCAO_MSG`) VALUES (?, ?, ?) ',[idExecucao, data, msg], callback);
 }
 
 module.exports = function(){

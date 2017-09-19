@@ -1,3 +1,5 @@
+var logger = require('../servicos/logger.js');
+
 var cron = require('node-schedule');
 var date = require('date-and-time');
 
@@ -7,7 +9,7 @@ module.exports = function(app){
   //0 1 * * *
   // */2 * * * *
   cron.scheduleJob('0 1 * * *', function(){
-      console.log("NOVA DATA 1", date.format(new Date(), 'DD/MM/YYYY HH:mm:ss'));
+			logger.warn("NOVA DATA 1", date.format(new Date(), 'DD/MM/YYYY HH:mm:ss'));
       disparoDeExecucao();
   });
 
@@ -18,8 +20,8 @@ module.exports = function(app){
 
       DescarteDao.insereRegistroExecucao(new Date(), function(erro, resultado){
         if(erro){
-          console.log('Erro ao inserir no banco:' + erro);
-          // res.status(500).send(erro);
+					logger.error('disparoDeExecucao: ' + erro);
+					persisteErro('1', 'disparoDeExecucao - ' + erro);
         } else {
           consultaDeProdutosParaDescarte(resultado.insertId);
         }
@@ -27,35 +29,27 @@ module.exports = function(app){
   };
 
   function consultaDeProdutosParaDescarte(idExecucao){
+    var ClienteProdutos = new app.servicos.clienteProdutosParaDescarte();
 
-    var connection = app.persistencia.connectionFactory();
-    var DescarteDao = new app.persistencia.DescarteDao(connection);
+    ClienteProdutos.consulta(function(exception, request, response, retorno){
+      if(exception){
+				logger.error('consultaDeProdutosParaDescarte: ' + erro);
+				persisteErro('1', 'consultaDeProdutosParaDescarte - ' + erro);
+      }
 
-    var clienteProdutos = new app.servicos.clienteProdutosParaDescarte();
-
-    clienteProdutos.consulta(function(exception, request, response, retorno){
-          if(exception){
-            console.log(exception);
-            // res.status(400).send(exception);
-            return;
-          }
-
-          if (retorno.length >= 1) {
-            populaJsonComProdutos(idExecucao, retorno);
-          }
+      if (retorno.length >= 1) {
+        populaJsonComProdutos(idExecucao, retorno);
+      }
     });
-
   };
 
   function populaJsonComProdutos(idExecucao,retorno){
       var notificacao = new Object();
-
       notificacao.EXECUCOES_ID = idExecucao;
       for (var i = 0; i < retorno.length; i++) {
         notificacao.NOTIFICACAO_JSON_VALORES = JSON.stringify(retorno[i]);
       }
       notificacao.NOTIFICACAO_POSTADA = "F";
-
       insereNotificacao(notificacao);
   }
 
@@ -66,8 +60,8 @@ module.exports = function(app){
 
     DescarteDao.insereRegistroNotificacoes(notificacao, function(erro, resultado){
       if(erro){
-        console.log('Erro ao inserir no banco 1: ' + erro);
-        // res.status(500).send(erro);
+				logger.error('insereNotificacao: ' + erro);
+				persisteErro(notificacao.EXECUCOES_ID, 'insereNotificacao - ' + erro);
       } else {
         postaMensagemNaFila(notificacao, resultado.insertId);
       }
@@ -83,10 +77,10 @@ module.exports = function(app){
 
 	    var filas = new app.filas.MessageProducer();
 	    filas.enviaSolicitacaoDescarte(destination, msg);
-
 	    alteraStatusPostagemNotificacaoNaFila(idNotificacao);
 		}else {
-			console.log('FORNECEDOR '+msgNotificacao.FORNECEDOR_ID);
+			logger.error('postaMensagemNaFila: FORNECEDOR NAO CADASTRADO :' + msgNotificacao.FORNECEDOR_ID);
+			persisteErro(notificacao.EXECUCOES_ID, 'postaMensagemNaFila - FORNECEDOR NAO CADASTRADO');
 		}
   }
 
@@ -96,13 +90,22 @@ module.exports = function(app){
 
     DescarteDao.alteraFlagPostagemNotificacao(idNotificacao, function(erro, resultado){
       if(erro){
-        console.log('Erro ao inserir no banco: 2 ' + erro);
-        // res.status(500).send(erro);
-      } else {
-        //sucesso;
+				logger.error('alteraStatusPostagemNotificacaoNaFila: ' + erro);
+				persisteErro('1', 'alteraStatusPostagemNotificacaoNaFila - ' + erro);
       }
     });
+  }
 
+	function persisteErro(idExecucao, msg){
+    var connection = app.persistencia.connectionFactory();
+    var DescarteDao = new app.persistencia.DescarteDao(connection);
+    DescarteDao.registraErroExecucao(idExecucao, new Date(), msg, function(erro, resultado){
+      if(erro){
+				console.log(erro);
+				console.log(' idExecucao: '+ idExecucao +' DATE: '+ new Date() +' MSG: '+ msg);
+        logger.error('notificacoesDeDescarte.Js/persisteErro: ' + erro);
+      }
+    });
   }
 
 }
