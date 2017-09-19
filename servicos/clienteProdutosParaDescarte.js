@@ -4,7 +4,6 @@
  * Description: Arquivo com implementação de um Client REST, que consome uma operação do modulo asdEstoque.
  * Data: 19/09/2017
  */
-var re
 var restify = require('restify');
 var clients = require('restify-clients');
 
